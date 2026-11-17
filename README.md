@@ -29,10 +29,10 @@ Solie 是本地多模态创作工作台，提供自由画布、电商套图、�
 
 ### 提示“Solie 已损坏，无法打开”
 
-这个提示不能直接证明只是未签名，也可能是下载不完整或文件被修改。请先重新下载，并核对当前 Release 中的 SHA-256 校验值。Mac 终端示例（按实际下载位置调整）：
+这个提示不能直接证明只是未签名，也可能是下载不完整或文件被修改。请先重新下载，并与对应版本随安装包发布的 `SHA256SUMS.txt` 核对。以下命令中的 `版本号` 和路径请按实际下载的文件调整：
 
 ```sh
-shasum -a 256 ~/Downloads/Solie-0.1.0-mac-arm64.dmg
+shasum -a 256 "$HOME/Downloads/Solie-版本号-mac-arm64.dmg"
 ```
 
 确认校验值一致、应用来自本仓库，且已复制到「应用程序」后，如果仍因下载隔离标记无法启动，可自行在终端对 **Solie 这一个应用** 移除该标记，再打开：
@@ -51,23 +51,27 @@ xattr -dr com.apple.quarantine /Applications/Solie.app
 
 如果出现「Windows 已保护你的电脑」或“未知发布者”，确认安装包来自本仓库且校验值一致后，可在系统提供该选项时点击「更多信息 → 仍要运行」。某些组织策略或 Smart App Control 可能不提供继续入口；不要为安装而关闭全局保护。参见 [Microsoft 关于应用信誉与拦截的说明](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)。
 
-PowerShell 校验示例：
+PowerShell 校验示例（将 `版本号` 和路径按实际下载的文件调整，再与对应版本的 `SHA256SUMS.txt` 核对）：
 
 ```powershell
-Get-FileHash "$env:USERPROFILE\Downloads\Solie-0.1.0-win-x64-Setup.exe" -Algorithm SHA256
+Get-FileHash -LiteralPath "$env:USERPROFILE\Downloads\Solie-版本号-win-x64-Setup.exe" -Algorithm SHA256
 ```
 
 ## 首次使用与本地数据
 
 打开后在应用设置中配置自己的 API Key。安装包不包含开发者的 Key 或 `.env`，AI 功能需要可用网络和有效的服务配置。
 
-- Mac 数据目录：`~/Library/Application Support/Solie/`
-- Windows 数据目录：`%APPDATA%\Solie\`
+- macOS 默认数据目录：`~/Library/Application Support/cn.solie.desktop/`
+- Windows 默认数据目录：`%APPDATA%\cn.solie.desktop\`
 
-项目与素材保存在 `Projects`，运行数据与日志在 `Runtime`，连接器配置在 `Config`；API Key 与路由设置通过系统加密后保存为 `credentials.bin`。数据不会自动在两台电脑间同步。
+项目和素材保存在数据目录的 `Projects` 中，连接器配置在 `config` 中。API Key 在 macOS 上保存在系统钥匙串，在 Windows 上由 DPAPI 加密后保存在 `credentials.dpapi` 中。仅复制数据目录不能保证把 API Key 一起迁移到另一台电脑。数据不会自动跨设备同步。
+
+旧版可能仍留有名为 `Solie` 的数据目录。它与当前版使用的目录不同；备份当前版时请确认复制的是 `cn.solie.desktop`，并检查备份中是否包含 `Projects`。
 
 ## 更新
 
-0.1.0 可在「设置 → 关于 → 检查更新」查看新版本并打开安装包链接。从 **0.1.1** 起支持在应用内下载安装包，切换页面时下载继续。下载完成后，等待生成任务结束，再点击「开始更新」；应用会先保存当前项目，成功打开系统安装包后退出，由你按系统安装步骤完成覆盖安装。保存或打开失败时不会退出。当前仍为完整安装包更新，不提供增量更新或自动覆盖安装。
+在「设置 → 关于」可检查更新。应用内下载完成并通过校验后，等正在运行的任务结束，再点击「开始更新」。Solie 会先保存当前项目，成功启动安装包后才退出。macOS 会打开 DMG，由你完成覆盖安装；Windows 使用系统安装器更新。下载完成不会自动安装。
 
-更新前等待生成任务结束、保存项目并完全退出 Solie，再覆盖安装新版。Mac 使用菜单「退出 Solie」；Windows 关闭最后一个窗口即退出。正常覆盖安装保留项目和设置，建议更新前备份本地数据，勿删除数据目录。此前测试包即使同为 0.1.0，也需手动替换为本次发布的安装包。
+应用内更新只在发布页提供当前版本到目标版本的同平台差分包、且应用缓存中已有匹配并通过校验的当前版本完整安装包时使用差分。不满足条件或差分下载、还原失败时，应用会下载完整安装包。手动下载时，请选择上方表格中的完整安装包，不要单独下载 `.delta` 文件。
+
+更新前建议备份上面列出的当前版数据目录，不要删除原目录。若手动覆盖安装，请先等待任务结束、保存项目并完全退出 Solie。macOS 使用「退出 Solie」或 `⌘Q`，不要只关闭窗口；Windows 关闭最后一个窗口即可退出。
